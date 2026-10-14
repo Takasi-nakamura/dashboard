@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>勉強ダッシュボード</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <main class="container">
+        <header class="header">
+            <div>
+                <p class="subtitle">YOUR STUDY SPACE</p>
+                <h1 class="title">学習してね。</h1>
+            </div>
+        </header>
+
+        <section class="dashboard">
+
+            <!-- 現在時刻 -->
+            <article class="card clock">
+                <div class="card-heading">
+                    <span class="icon-box blue">
+                        <i data-lucide="clock"></i>
+                    </span>
+                    <h2>現在時刻</h2>
+                </div>
+                <p class="zikoku" id="clock">00:00:00</p>
+                <p class="card-caption">CURRENT TIME</p>
+            </article>
+
+            <!-- Todo List -->
+            <article class="card todolist">
+                <div class="card-heading">
+                    <span class="icon-box purple">
+                        <i data-lucide="list-checks"></i>
+                    </span>
+                    <h2>Todo List</h2>
+                </div>
+
+                <form class="todo-form" id="todoForm">
+                    <input
+                        class="todoinput"
+                        id="todoInput"
+                        type="text"
+                        placeholder="やることを入力..."
+                        aria-label="やること"
+                        autocomplete="off"
+                    >
+                    <button
+                        class="icon-button addtodo"
+                        type="submit"
+                        aria-label="Todoを追加"
+                        title="Todoを追加"
+                    >
+                        <i data-lucide="plus"></i>
+                    </button>
+                </form>
+
+                <ul class="todo-items" id="todoList"></ul>
+            </article>
+
+            <!-- Timer -->
+            <article class="card timer">
+                <div class="card-heading">
+                    <span class="icon-box orange">
+                        <i data-lucide="timer"></i>
+                    </span>
+                    <h2>Timer</h2>
+                </div>
+
+                <p class="timerhyouzi" id="timerDisplay">00:00</p>
+
+                <div class="timer-controls">
+                    <input
+                        class="timerinput"
+                        id="timerMinutes"
+                        type="number"
+                        min="1"
+                        max="999"
+                        placeholder="分"
+                        aria-label="タイマーの分数"
+                    >
+                    <button
+                        class="icon-button timerstart"
+                        id="timerStart"
+                        type="button"
+                        aria-label="タイマー開始"
+                        title="タイマー開始"
+                    >
+                        <i data-lucide="play"></i>
+                    </button>
+                    <button
+                        class="icon-button secondary timerreset"
+                        id="timerReset"
+                        type="button"
+                        aria-label="タイマーリセット"
+                        title="リセット"
+                    >
+                        <i data-lucide="rotate-ccw"></i>
+                    </button>
+                </div>
+                <p class="card-caption">FOCUS TIME</p>
+            </article>
+
+            <!-- Stopwatch -->
+            <article class="card stopwatch">
+                <div class="card-heading">
+                    <span class="icon-box green">
+                        <i data-lucide="hourglass"></i>
+                    </span>
+                    <h2>Stopwatch</h2>
+                </div>
+
+                <p class="stopwatchhyouzi" id="stopwatchDisplay">00:00.0</p>
+
+                <div class="stopwatch-controls">
+                    <button
+                        class="icon-button stopwatchstart"
+                        id="stopwatchStart"
+                        type="button"
+                        aria-label="ストップウォッチ開始"
+                        title="スタート"
+                    >
+                        <i data-lucide="play"></i>
+                    </button>
+                    <button
+                        class="icon-button secondary stopwatchreset"
+                        id="stopwatchReset"
+                        type="button"
+                        aria-label="ストップウォッチリセット"
+                        title="リセット"
+                    >
+                        <i data-lucide="rotate-ccw"></i>
+                    </button>
+                </div>
+                <p class="card-caption">TRACK YOUR TIME</p>
+            </article>
+
+        </section>
+    </main>
+</body>
+</html>
