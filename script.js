@@ -180,12 +180,31 @@ todoForm.addEventListener("submit", (e) => {
 // =========================
 // タイマー（指定時間）
 // =========================
-const timerState = {
-    remainingMs: 0,  // 一時停止中・未開始時の残り時間
-    endAt: 0,        // 動作中の終了時刻（Date.now基準）
-    running: false,
-    intervalId: null
-};
+const TIMER_STORAGE_KEY = "study-dashboard-timer";
+const timerState = { remainingMs: 0, endAt: 0, running: false, intervalId: null };
+
+function saveTimerState() {
+    try {
+        localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify({
+            remainingMs: timerState.running ? Math.max(0, timerState.endAt - Date.now()) : timerState.remainingMs,
+            endAt: timerState.endAt,
+            running: timerState.running,
+            minutes: timerMinutesInput.value
+        }));
+    } catch {}
+}
+
+function restoreTimerState() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(TIMER_STORAGE_KEY));
+        if (!saved || typeof saved !== "object") return;
+        timerState.remainingMs = Math.max(0, Number(saved.remainingMs) || 0);
+        timerState.endAt = Math.max(0, Number(saved.endAt) || 0);
+        timerState.running = saved.running === true && timerState.endAt > 0;
+        if (saved.minutes) timerMinutesInput.value = saved.minutes;
+        if (timerState.running) timerState.remainingMs = Math.max(0, timerState.endAt - Date.now());
+    } catch {}
+}
 
 function formatMinSec(ms) {
     const totalSec = Math.ceil(ms / 1000);
@@ -205,7 +224,9 @@ function stopTimerInterval() {
 
 function tickTimer() {
     const left = Math.max(0, timerState.endAt - Date.now());
+    timerState.remainingMs = left;
     renderTimer(left);
+    saveTimerState();
     if (left === 0) finishTimer();
 }
 
@@ -229,6 +250,7 @@ function startTimer() {
 
     timerState.endAt = Date.now() + timerState.remainingMs;
     timerState.running = true;
+    saveTimerState();
     stopTimerInterval();
     timerState.intervalId = setInterval(tickTimer, 250);
 
@@ -240,6 +262,7 @@ function pauseTimer() {
     timerState.remainingMs = Math.max(0, timerState.endAt - Date.now());
     timerState.running = false;
     stopTimerInterval();
+    saveTimerState();
 
     setIcon(timerStartBtn, "play", "タイマー開始");
     renderTimer(timerState.remainingMs);
@@ -249,6 +272,7 @@ function finishTimer() {
     timerState.running = false;
     timerState.remainingMs = 0;
     stopTimerInterval();
+    saveTimerState();
 
     setIcon(timerStartBtn, "play", "タイマー開始");
     renderTimer(0);
@@ -259,7 +283,9 @@ function finishTimer() {
 function resetTimer() {
     timerState.running = false;
     timerState.remainingMs = 0;
+    timerState.endAt = 0;
     stopTimerInterval();
+    saveTimerState();
 
     setIcon(timerStartBtn, "play", "タイマー開始");
     renderTimer(0);
@@ -286,12 +312,28 @@ timerMinutesInput.addEventListener("input", () => {
 // =========================
 // ストップウォッチ
 // =========================
-const swState = {
-    elapsed: 0,      // 停止時点までの経過ms
-    startedAt: 0,    // 現在の計測開始時刻
-    running: false,
-    intervalId: null
-};
+const STOPWATCH_STORAGE_KEY = "study-dashboard-stopwatch";
+const swState = { elapsed: 0, startedAt: 0, running: false, intervalId: null };
+
+function saveStopwatchState() {
+    try {
+        localStorage.setItem(STOPWATCH_STORAGE_KEY, JSON.stringify({
+            elapsed: swState.elapsed,
+            startedAt: swState.startedAt,
+            running: swState.running
+        }));
+    } catch {}
+}
+
+function restoreStopwatchState() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(STOPWATCH_STORAGE_KEY));
+        if (!saved || typeof saved !== "object") return;
+        swState.elapsed = Math.max(0, Number(saved.elapsed) || 0);
+        swState.startedAt = Math.max(0, Number(saved.startedAt) || 0);
+        swState.running = saved.running === true && swState.startedAt > 0;
+    } catch {}
+}
 
 function currentStopwatchMs() {
     return swState.running
@@ -309,6 +351,7 @@ function formatStopwatch(ms) {
 
 function renderStopwatch() {
     stopwatchDisplay.textContent = formatStopwatch(currentStopwatchMs());
+    saveStopwatchState();
 }
 
 function toggleStopwatch() {
@@ -330,6 +373,7 @@ function toggleStopwatch() {
 function resetStopwatch() {
     swState.running = false;
     swState.elapsed = 0;
+    swState.startedAt = 0;
     clearInterval(swState.intervalId);
     swState.intervalId = null;
 
@@ -346,7 +390,27 @@ stopwatchResetBtn.addEventListener("click", resetStopwatch);
 function init() {
     startClock();
     renderTodos();
-    renderTimer(0);
+
+    restoreTimerState();
+    if (timerState.running) {
+        setIcon(timerStartBtn, "pause", "タイマー一時停止");
+        timerState.intervalId = setInterval(tickTimer, 250);
+        tickTimer();
+    } else {
+        setIcon(timerStartBtn, "play", "タイマー開始");
+        renderTimer(timerState.remainingMs);
+        if (timerState.remainingMs === 0 && timerMinutesInput.value) {
+            renderTimer((Number(timerMinutesInput.value) || 0) * 60 * 1000);
+        }
+    }
+
+    restoreStopwatchState();
+    if (swState.running) {
+        setIcon(stopwatchStartBtn, "pause", "ストップウォッチ一時停止");
+        swState.intervalId = setInterval(renderStopwatch, 100);
+    } else {
+        setIcon(stopwatchStartBtn, "play", "ストップウォッチ開始");
+    }
     renderStopwatch();
     lucide.createIcons();
 }
